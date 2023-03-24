@@ -13,13 +13,13 @@ class DatabaseHandler():
         self.db = self.connect()
         self.cursor = self.db.cursor(dictionary=True)
 
-    def connect():
+    def connect(self):
         return mysql.connector.connect(
-            host=HOST, 
-            port=PORT, 
-            user=USER,
-            password=PASSWORD, 
-            database=DATABASE
+            host=self.HOST, 
+            port=self.PORT, 
+            user=self.USER,
+            password=self.PASSWORD, 
+            database=self.DATABASE
         )
 
     def is_table_exists(self, table_name:str):
@@ -30,8 +30,7 @@ class DatabaseHandler():
                 return True
         except:
             pass
-        finally:
-            return False
+        return False
 
     def create_table(self):
         if not self.is_table_exists('uploads'):
@@ -43,6 +42,17 @@ class DatabaseHandler():
                 f'    language VARCHAR(255),'
                 f'    enable BOOLEAN DEFAULT 0,'
                 f'    PRIMARY KEY (id)'
+                f');'
+            )
+        
+        if not self.is_table_exists('jobs'):
+            self.cursor.execute(
+                f'CREATE TABLE JOBS ('
+                f'    id INT AUTO_INCREMENT PRIMARY KEY,'
+                f'    upload_id INT,'
+                f'    job VARCHAR(255),'
+                f'    executed BOOLEAN DEFAULT 0,'
+                f'    FOREIGN KEY (upload_id) REFERENCES UPLOADS(id)'
                 f');'
             )
 
@@ -57,17 +67,6 @@ class DatabaseHandler():
                 f'    FOREIGN KEY (job_id) REFERENCES JOBS(id)'
                 f');'
             )
-
-        if not self.is_table_exists('jobs'):
-            self.cursor.execute(
-                f'CREATE TABLE JOBS ('
-                f'    id INT AUTO_INCREMENT PRIMARY KEY,'
-                f'    upload_id INT,'
-                f'    job VARCHAR(255),'
-                f'    executed BOOLEAN DEFAULT 0,'
-                f'    FOREIGN KEY (upload_id) REFERENCES UPLOADS(id)'
-                f');'
-            )
         
     def insert_uploads(self, email='', inputs='', language=''):
         sql = 'INSERT INTO UPLOADS (email, inputs, language) VALUES (%s, %s, %s)'
@@ -80,7 +79,7 @@ class DatabaseHandler():
 
     def insert_results(self, job_id):
         sql = 'INSERT INTO RESULTS (job_id) VALUES (%s)'
-        val = (job_id)
+        val = (job_id,)
         self.cursor.execute(sql, val)
 
         self.db.commit()
@@ -98,18 +97,18 @@ class DatabaseHandler():
 
     def find(self, table_name, row_id, column_list='*'):
         if column_list == '*':
-            sql = f'SELECT * FROM {table_name} WHERE ID = {row_id}'
+            sql = f"SELECT * FROM {table_name} WHERE ID = {row_id}"
         else:
-            sql = f'SELECT {', '.join(column_list)} FROM {table_name} WHERE ID = {row_id}'
+            sql = f"SELECT {', '.join(column_list)} FROM {table_name} WHERE ID = {row_id}"
         self.cursor.execute(sql)
 
         return self.cursor.fetchone()
 
     def find_all(self, table_name, column_list='*'):
         if column_list == '*':
-            sql = f'SELECT * FROM {table_name}'
+            sql = f"SELECT * FROM {table_name}"
         else:
-            sql = f'SELECT {', '.join(column_list)} FROM {table_name}'
+            sql = f"SELECT {', '.join(column_list)} FROM {table_name}"
         self.cursor.execute(sql)
 
         return self.cursor.fetchall()
@@ -117,19 +116,20 @@ class DatabaseHandler():
     def update(self, table_name, row_id, column_list, column_value):
 
         def pair2str(key, value):
-            if isisntance(key, str):
+            if isinstance(key, str):
                 return f"{key}='{value}'"
             return f"{key}={value}"
         
         column_dict = dict(zip(column_list, column_value))
         assign_list = [pair2str(k, v) for k, v in column_dict.items()]
-        sql = f'UPDATE {table_name} SET {', '.join(assign_list)} WHERE id = {row_id}'
+        sql = f"UPDATE {table_name} SET {', '.join(assign_list)} WHERE id = {row_id}"
         self.cursor.execute(sql)
+        print(f'pairs updated: {assign_list}')
 
-        db.commit()
+        self.db.commit()
 
     def delete(self, table_name, row_id):
         sql = f'DELETE FROM {table_name} WHERE ID = {row_id}'
         self.cursor.execute(sql)
 
-        db.commit()
+        self.db.commit()
