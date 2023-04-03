@@ -33,7 +33,7 @@ class S3Handler():
                 Body=body,
                 Key=filename
             )
-        except ClientError as e:
+        except boto3.clinet.ClientError as e:
             print(e)
 
     def download(self, filename):
@@ -45,6 +45,6 @@ class S3Handler():
                 object_name,
                 download_path
             )
-        except ClientError as e:
+        except boto3.client.ClientError as e:
             print(e)
 
