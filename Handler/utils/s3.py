@@ -1,12 +1,12 @@
 import boto3
 
 
-class S3Handler():
+LIARA_ENDPOINT="https://storage.iran.liara.space"
+LIARA_BUCKET_NAME="awesome-curie-tcm8e8snw"
+LIARA_ACCESS_KEY="t4u1cmc3n4r3hu38"
+LIARA_SECRET_KEY="bb22d137-ae06-4d81-9262-5e9afc9de151"
 
-    LIARA_ENDPOINT="https://storage.iran.liara.space"
-    LIARA_BUCKET_NAME="awesome-curie-tcm8e8snw"
-    LIARA_ACCESS_KEY="t4u1cmc3n4r3hu38"
-    LIARA_SECRET_KEY="bb22d137-ae06-4d81-9262-5e9afc9de151"
+class S3Handler():
 
     def __init__(self):
         self.resources = self.connect()
@@ -39,7 +39,7 @@ class S3Handler():
     def download(self, filename):
         try:
             object_name = filename
-            download_path = f'/tmp/{filename}'
+            download_path = f'tmp/{filename}'
 
             self.bucket.download_file(
                 object_name,

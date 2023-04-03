@@ -12,6 +12,7 @@ class DatabaseHandler():
     def __init__(self):
         self.db = self.connect()
         self.cursor = self.db.cursor(dictionary=True)
+        self.create_table()
 
     def connect(self):
         return mysql.connector.connect(
