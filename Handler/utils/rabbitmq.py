@@ -1,12 +1,13 @@
 import pika
 
+AMQP_URL = "amqps://grawkbwj:nbMRsg9sF8lNGnrKjGM24BQLC7tSaUQS@hummingbird.rmq.cloudamqp.com/grawkbwj" 
 
 class RabbitMQHandler():
 
-    AMQP_URL = "amqps://grawkbwj:nbMRsg9sF8lNGnrKjGM24BQLC7tSaUQS@hummingbird.rmq.cloudamqp.com/grawkbwj" 
-
     def __init__(self):
+        self.queue_name = "run"
         self.connection, self.channel = self.connect()
+        self.declare_queue(self.queue_name)
 
     def __enter__(self):
         return self.channel
@@ -23,11 +24,11 @@ class RabbitMQHandler():
         if self.channel:
             self.channel.queue_declare(queue=queue_name)
 
-    def publish_on_queue(self, queue_name:str, content):
+    def publish_on_queue(self, content):
         if self.channel:
-            self.channel.basic_publish(exchange='', routing_key=queue_name, body=content)
+            self.channel.basic_publish(exchange='', routing_key=self.queue_name, body=content)
 
-    def consume_on_queue(self, queue_name:str, callback):
+    def consume_on_queue(self, callback):
         if self.channel:
-            self.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+            self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback, auto_ack=True)
             self.channel.start_consuming()
