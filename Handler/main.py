@@ -18,8 +18,10 @@ def upload(file: UploadFile,
         s3_handler = S3Handler()
         db_handler = DatabaseHandler()
         contents = file.file.read()
-        s3_handler.store(body=contents, filename=file.filename)
-        upload_id = db_handler.insert_uploads(email, inputs, language)
+        upload_id = db_handler.insert_uploads(email, 
+                                              inputs, 
+                                              language)
+        s3_handler.store(body=contents, filename=f"{upload_id}")
     except Exception:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "There was an error uploading the file"}
@@ -39,13 +41,14 @@ def run(upload_id: int,
         db_handler = DatabaseHandler()
         row = db_handler.find('UPLOADS', row_id=upload_id)
         print
-        if row and row['enable'] == 1:
-            rabbitmq_handler = RabbitMQHandler()
-            rabbitmq_handler.publish_on_queue(upload_id)
-            return {"message": f"`upload_id`={upload_id} added to queue to execute"}
+        if row and row['enable'] == 0:
+            with RabbitMQHandler() as rabbitmq_handler:
+                rabbitmq_handler.publish_on_queue(upload_id)
+                return {"message": f"`upload_id`={upload_id} added to queue to execute"}
         else:
             response.status_code = status.HTTP_404_NOT_FOUND
             return {"message": f"`upload_id`={upload_id} not found"}
-    except Exception:
+    except Exception as e:
+        print(e)
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "There was an error in running file"}
