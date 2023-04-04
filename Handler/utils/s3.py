@@ -1,4 +1,6 @@
+import os
 import boto3
+from botocore.exceptions import ClientError
 
 
 LIARA_ENDPOINT="https://storage.iran.liara.space"
@@ -33,18 +35,30 @@ class S3Handler():
                 Body=body,
                 Key=filename
             )
-        except boto3.clinet.ClientError as e:
+        except ClientError as e:
             print(e)
 
     def download(self, filename):
         try:
-            object_name = filename
             download_path = f'tmp/{filename}'
+            os.makedirs('tmp', exist_ok=True)
 
             self.bucket.download_file(
-                object_name,
+                filename,
                 download_path
             )
-        except boto3.client.ClientError as e:
+        except ClientError as e:
             print(e)
+
+    def read_file(self, filename):
+        self.download(filename)
+        download_path = f'tmp/{filename}'
+        if os.path.exists(download_path):
+            text = None
+            with open(download_path, 'r') as f:
+                text = f.read()
+
+            os.remove(download_path)
+
+            return text
 
