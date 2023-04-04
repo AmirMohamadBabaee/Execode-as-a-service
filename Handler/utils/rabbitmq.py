@@ -10,7 +10,7 @@ class RabbitMQHandler():
         self.declare_queue(self.queue_name)
 
     def __enter__(self):
-        return self.channel
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.connection.close()
@@ -26,7 +26,7 @@ class RabbitMQHandler():
 
     def publish_on_queue(self, content):
         if self.channel:
-            self.channel.basic_publish(exchange='', routing_key=self.queue_name, body=content)
+            self.channel.basic_publish(exchange='', routing_key=self.queue_name, body=f"{content}")
 
     def consume_on_queue(self, callback):
         if self.channel:
