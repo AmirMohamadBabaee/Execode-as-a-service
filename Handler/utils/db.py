@@ -111,25 +111,28 @@ class DatabaseHandler():
 
         return self.cursor.fetchone()
 
-    def find_all(self, table_name, column_list='*'):
+    def find_all(self, table_name, conditions_dict, column_list='*'):
         if column_list == '*':
             sql = f"SELECT * FROM {table_name}"
         else:
             sql = f"SELECT {', '.join(column_list)} FROM {table_name}"
+
+        if conditions_dict:
+            sql += f" WHERE {', '.join([f'{k} = {v}' for k, v in conditions_dict.items()])}"
         self.cursor.execute(sql)
 
         return self.cursor.fetchall()
 
-    def update(self, table_name, row_id, column_list, column_value):
+    def update(self, table_name, condition_dict, assignment_dict):
 
         def pair2str(key, value):
             if isinstance(key, str):
                 return f"{key}='{value}'"
             return f"{key}={value}"
-        
-        column_dict = dict(zip(column_list, column_value))
-        assign_list = [pair2str(k, v) for k, v in column_dict.items()]
-        sql = f"UPDATE {table_name} SET {', '.join(assign_list)} WHERE id = {row_id}"
+
+        assign_list = [pair2str(k, v) for k, v in assignment_dict.items()]
+        condition_list = [pair2str(k, v) for k, v in condition_dict.items()]
+        sql = f"UPDATE {table_name} SET {', '.join(assign_list)} WHERE {', '.join(condition_list)}"
         self.cursor.execute(sql)
         print(f'pairs updated: {assign_list}')
 
