@@ -52,3 +52,17 @@ def run(upload_id: int,
         print(e)
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "There was an error in running file"}
+
+@app.post('/result')
+def results(email: str,
+            response: Response):
+    try:
+        with DatabaseHandler() as db_handler:
+            results = db_handler.find_all_results_email(email)
+            if results:
+                return results
+            else: 
+                return []
+    except:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {'message': 'There is something wrong in Server'}

@@ -138,6 +138,18 @@ class DatabaseHandler():
 
         self.db.commit()
 
+    def find_all_results_email(self, email: str):
+        sql = f'''
+        SELECT r.* 
+        FROM UPLOADS u 
+        INNER JOIN JOBS j ON u.id = j.upload_id 
+        INNER JOIN RESULTS r ON j.id = r.job_id 
+        WHERE u.email = '{email}';
+        '''
+        self.cursor.execute(sql)
+
+        return self.cursor.fetchall()
+
     def delete(self, table_name, row_id):
         sql = f'DELETE FROM {table_name} WHERE ID = {row_id}'
         self.cursor.execute(sql)

@@ -109,7 +109,7 @@ def loop():
 if __name__ == '__main__':
     # print(codex_request('test.py'))
     # print(codex_request_str(parse.urlencode({'code': 'import os\nprint(os.getcwd())\nprint(3 + 4)', 'language': 'py', 'input': ''})))
-    # while(True):
-    #     loop()
-    #     time.sleep(30)
-    send_email('iran.volleyball79@gmail.com', 'hello, I am a test output')
+    while(True):
+        loop()
+        time.sleep(30)
+    # send_email('iran.volleyball79@gmail.com', 'hello, I am a test output')
